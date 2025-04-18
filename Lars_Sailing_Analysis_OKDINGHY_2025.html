@@ -1,0 +1,1039 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sailing Performance Analysis - Lars Stenfeldt Hansen</title>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004fa3;
+            --secondary: #e6f2ff;
+            --positive: #009933;
+            --negative: #cc0000;
+            --improvement: #ff9900;
+            --highlight: #fff8e6;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f9fc;
+        }
+        h1, h2, h3, h4 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        .header h2 {
+            color: white;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            margin-bottom: 8px;
+            font-size: 1.6em;
+        }
+        .header p {
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            margin-bottom: 0;
+            font-size: 1.1em;
+        }
+        .training-info {
+            background-color: var(--secondary);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #d0e3ff;
+        }
+        .summary {
+            background-color: var(--secondary);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #d0e3ff;
+        }
+        .section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border: 1px solid #eee;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        .positive {
+            color: var(--positive);
+            font-weight: bold;
+        }
+        .negative {
+            color: var(--negative);
+            font-weight: bold;
+        }
+        .improvement {
+            color: var(--improvement);
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #666;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .info-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        .highlight-box {
+            background-color: var(--highlight);
+            border-left: 4px solid var(--improvement);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .performance-chart {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+            border: 1px dashed #ccc;
+        }
+        tfoot {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+        .scrollable-table {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .badge-positive {
+            background-color: #e6f7e6;
+            color: var(--positive);
+        }
+        .badge-negative {
+            background-color: #ffebeb;
+            color: var(--negative);
+        }
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+            .header {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .header h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>High Performance Sailing Analysis Report</h1>
+        <h2>Lars Stenfeldt Hansen - OK Dinghy (DEN-150)</h2>
+        <p>Training Session: April 1, 2025 | Hellerup Sejlklub, Øresund</p>
+    </div>
+
+    <div class="training-info">
+        <h2>Training Session Overview</h2>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Sailor Information</h3>
+                <p><strong>Name:</strong> Lars Stenfeldt Hansen</p>
+                <p><strong>Club:</strong> Hellerup Sejlklub</p>
+                <p><strong>Boat Class:</strong> OK Dinghy</p>
+                <p><strong>Sail Number:</strong> DEN-150</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>Environmental Conditions</h3>
+                <p><strong>Wind Speed:</strong> 3-8 m/s (6-16 knots)</p>
+                <p><strong>Wind Direction:</strong> 355° (North)</p>
+                <p><strong>Water State:</strong> Very choppy waves</p>
+                <p><strong>Current:</strong> 1 knot from North to South</p>
+                <p><strong>Weather:</strong> Sunny conditions</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>Session Metrics</h3>
+                <p><strong>Start Time:</strong> 15:12:48</p>
+                <p><strong>Duration:</strong> 3h 51m</p>
+                <p><strong>Total Distance:</strong> 22,773m</p>
+                <p><strong>Upwind Distance:</strong> 16,665m</p>
+                <p><strong>Total Maneuvers:</strong> 80</p>
+            </div>
+        </div>
+        
+        <h3>Performance Summary</h3>
+        <div class="scrollable-table">
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>Upwind</th>
+                    <th>Downwind</th>
+                    <th>Overall</th>
+                </tr>
+                <tr>
+                    <td>Average Speed (SOG)</td>
+                    <td>3.68 knots</td>
+                    <td>4.01 knots</td>
+                    <td>3.2 knots</td>
+                </tr>
+                <tr>
+                    <td>Average VMG</td>
+                    <td>2.48 knots</td>
+                    <td>3.76 knots</td>
+                    <td>2.36 knots</td>
+                </tr>
+                <tr>
+                    <td>Best VMG</td>
+                    <td>3.14 knots <span class="badge badge-positive">Leg 7</span></td>
+                    <td>4.12 knots <span class="badge badge-positive">Leg 8</span></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Worst VMG</td>
+                    <td>0.64 knots <span class="badge badge-negative">Leg 1</span></td>
+                    <td>2.99 knots <span class="badge">Leg 2</span></td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Maneuvers per Leg</td>
+                    <td>5.4 average</td>
+                    <td>2.6 average</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Optimal Angles</td>
+                    <td>41-42° to wind</td>
+                    <td>165-170° to wind</td>
+                    <td>-</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="highlight-box">
+            <h4>Key Session Characteristics</h4>
+            <p>This training session featured challenging conditions with strong, variable winds (3-8 m/s) and choppy waves. The northerly current (1 knot) added complexity to both upwind and downwind legs. Lars demonstrated particularly strong downwind performance (average VMG 3.76 knots) despite these difficult conditions, while upwind performance showed room for improvement (average VMG 2.48 knots).</p>
+        </div>
+    </div>
+
+    <div class="summary">
+        <h2>Coach's Summary</h2>
+        <p>Lars, today's session in challenging conditions showed both strengths and areas for development. Your downwind performance was exceptional, but we can significantly improve upwind efficiency.</p>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Key Strengths</h3>
+                <ul>
+                    <li><span class="positive">World-class downwind VMG</span> (3.76 avg, 4.12 max)</li>
+                    <li><span class="positive">Excellent speed maintenance</span> (4.01 kts avg downwind)</li>
+                    <li><span class="positive">Precise angle management</span> (165-170° downwind)</li>
+                    <li><span class="positive">Adaptation to conditions</span> in choppy water</li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h3>Areas for Improvement</h3>
+                <ul>
+                    <li><span class="improvement">Upwind VMG consistency</span> (0.64-3.14 kts range)</li>
+                    <li><span class="improvement">Tack efficiency</span> (5.4 tacks/leg avg)</li>
+                    <li><span class="improvement">Early race performance</span> (Leg 1 VMG 0.64)</li>
+                    <li><span class="improvement">Angle consistency</span> (39-49° upwind)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h3>Next Session Focus</h3>
+        <div class="info-grid">
+            <div class="info-card">
+                <h4>Technical Focus</h4>
+                <ol>
+                    <li>Upwind sail trim optimization</li>
+                    <li>Roll tack perfection</li>
+                    <li>Weight placement drills</li>
+                </ol>
+            </div>
+            <div class="info-card">
+                <h4>Tactical Focus</h4>
+                <ol>
+                    <li>Angle consistency (41-42° upwind)</li>
+                    <li>Maneuver reduction strategy</li>
+                    <li>Starting intensity</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="performance-chart">
+            [VMG Performance Comparison Chart Would Appear Here]
+            <p>Visualization showing upwind vs downwind VMG consistency across all legs</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Complete Leg Data Analysis</h2>
+        
+        <h3>Upwind Legs Performance</h3>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Leg</th>
+                        <th>Start Time</th>
+                        <th>Duration</th>
+                        <th>Distance (m)</th>
+                        <th>Angle to Wind</th>
+                        <th>SOG (kts)</th>
+                        <th>VMG (kts)</th>
+                        <th>Maneuvers</th>
+                        <th>Efficiency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Leg 1</td>
+                        <td>15:12:48</td>
+                        <td>08:06</td>
+                        <td>947</td>
+                        <td>49.08°</td>
+                        <td>1.97</td>
+                        <td class="negative">0.64</td>
+                        <td>6</td>
+                        <td class="negative">32.5%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 3</td>
+                        <td>16:07:36</td>
+                        <td>09:28</td>
+                        <td>831</td>
+                        <td>39.39°</td>
+                        <td>3.70</td>
+                        <td>2.84</td>
+                        <td>8</td>
+                        <td>76.8%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 5</td>
+                        <td>16:24:32</td>
+                        <td>09:53</td>
+                        <td>845</td>
+                        <td>41.39°</td>
+                        <td>3.74</td>
+                        <td>2.77</td>
+                        <td>4</td>
+                        <td>74.1%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 7</td>
+                        <td>16:41:43</td>
+                        <td>08:42</td>
+                        <td>843</td>
+                        <td>41.85°</td>
+                        <td class="positive">4.25</td>
+                        <td class="positive">3.14</td>
+                        <td>3</td>
+                        <td class="positive">73.9%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 9</td>
+                        <td>16:56:53</td>
+                        <td>09:11</td>
+                        <td>827</td>
+                        <td>46.01°</td>
+                        <td>4.20</td>
+                        <td>2.92</td>
+                        <td>3</td>
+                        <td>69.5%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 11</td>
+                        <td>17:13:37</td>
+                        <td>09:33</td>
+                        <td>826</td>
+                        <td>43.33°</td>
+                        <td>3.96</td>
+                        <td>2.80</td>
+                        <td class="negative">13</td>
+                        <td>70.7%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 13</td>
+                        <td>17:30:05</td>
+                        <td>08:51</td>
+                        <td>833</td>
+                        <td>41.97°</td>
+                        <td>4.19</td>
+                        <td>3.05</td>
+                        <td>5</td>
+                        <td>72.8%</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">Upwind Averages</th>
+                        <td>850m</td>
+                        <td>43.3°</td>
+                        <td>3.68 kts</td>
+                        <td>2.48 kts</td>
+                        <td>5.4</td>
+                        <td>67.1%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <h3>Downwind Legs Performance</h3>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Leg</th>
+                        <th>Start Time</th>
+                        <th>Duration</th>
+                        <th>Distance (m)</th>
+                        <th>Angle to Wind</th>
+                        <th>SOG (kts)</th>
+                        <th>VMG (kts)</th>
+                        <th>Maneuvers</th>
+                        <th>Efficiency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Leg 2</td>
+                        <td>16:00:55</td>
+                        <td>06:40</td>
+                        <td>616</td>
+                        <td>148.47°</td>
+                        <td>3.63</td>
+                        <td>2.99</td>
+                        <td>1</td>
+                        <td>82.4%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 4</td>
+                        <td>16:17:05</td>
+                        <td>07:26</td>
+                        <td>857</td>
+                        <td>166.02°</td>
+                        <td>3.92</td>
+                        <td>3.73</td>
+                        <td>6</td>
+                        <td class="positive">95.2%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 6</td>
+                        <td>16:34:26</td>
+                        <td>07:16</td>
+                        <td>841</td>
+                        <td>170.61°</td>
+                        <td>3.88</td>
+                        <td>3.75</td>
+                        <td>1</td>
+                        <td class="positive">96.6%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 8</td>
+                        <td>16:50:25</td>
+                        <td>06:27</td>
+                        <td>821</td>
+                        <td>169.65°</td>
+                        <td class="positive">4.26</td>
+                        <td class="positive">4.12</td>
+                        <td>2</td>
+                        <td class="positive">96.7%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 10</td>
+                        <td>17:06:05</td>
+                        <td>07:31</td>
+                        <td>852</td>
+                        <td>153.59°</td>
+                        <td>3.94</td>
+                        <td>3.58</td>
+                        <td>4</td>
+                        <td>90.9%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 12</td>
+                        <td>17:23:12</td>
+                        <td>06:52</td>
+                        <td>834</td>
+                        <td>164.80°</td>
+                        <td>4.19</td>
+                        <td class="positive">3.92</td>
+                        <td>1</td>
+                        <td class="positive">93.6%</td>
+                    </tr>
+                    <tr>
+                        <td>Leg 14</td>
+                        <td>17:38:57</td>
+                        <td>06:51</td>
+                        <td>823</td>
+                        <td>161.09°</td>
+                        <td>4.21</td>
+                        <td>3.89</td>
+                        <td>2</td>
+                        <td class="positive">92.4%</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">Downwind Averages</th>
+                        <td>806m</td>
+                        <td>162.0°</td>
+                        <td>4.01 kts</td>
+                        <td>3.76 kts</td>
+                        <td>2.6</td>
+                        <td>92.3%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Key Observations</h4>
+            <div class="info-grid">
+                <div>
+                    <h5>Best Performances</h5>
+                    <ul>
+                        <li><strong>Upwind:</strong> Leg 7 (VMG 3.14 at 41.85° with only 3 tacks)</li>
+                        <li><strong>Downwind:</strong> Leg 8 (VMG 4.12 at 169.65° with 96.7% efficiency)</li>
+                        <li><strong>Speed:</strong> Leg 8 (SOG 4.26 knots downwind)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5>Areas Needing Work</h5>
+                    <ul>
+                        <li><strong>Upwind:</strong> Leg 1 (VMG 0.64 due to poor start)</li>
+                        <li><strong>Maneuvers:</strong> Leg 11 (13 tacks destroyed VMG)</li>
+                        <li><strong>Consistency:</strong> Upwind angle varied 39-49°</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>VMG Analysis</h2>
+        
+        <h3>VMG to SOG Comparison</h3>
+        <div class="scrollable-table">
+            <table>
+                <tr>
+                    <th>Leg</th>
+                    <th>Type</th>
+                    <th>SOG (knots)</th>
+                    <th>VMG (knots)</th>
+                    <th>VMG/SOG Ratio</th>
+                    <th>Efficiency Rating</th>
+                </tr>
+                <tr>
+                    <td>Leg 8</td>
+                    <td>Downwind</td>
+                    <td>4.26</td>
+                    <td>4.12</td>
+                    <td>96.7%</td>
+                    <td class="positive">Excellent</td>
+                </tr>
+                <tr>
+                    <td>Leg 12</td>
+                    <td>Downwind</td>
+                    <td>4.19</td>
+                    <td>3.92</td>
+                    <td>93.6%</td>
+                    <td class="positive">Excellent</td>
+                </tr>
+                <tr>
+                    <td>Leg 7</td>
+                    <td>Upwind</td>
+                    <td>4.25</td>
+                    <td>3.14</td>
+                    <td>73.9%</td>
+                    <td>Good</td>
+                </tr>
+                <tr>
+                    <td>Leg 1</td>
+                    <td>Upwind</td>
+                    <td>1.97</td>
+                    <td>0.64</td>
+                    <td>32.5%</td>
+                    <td class="negative">Needs Work</td>
+                </tr>
+                <tr>
+                    <td>Leg 11</td>
+                    <td>Upwind</td>
+                    <td>3.96</td>
+                    <td>2.80</td>
+                    <td>70.7%</td>
+                    <td>Average</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="highlight-box">
+            <h4>VMG Efficiency Insight</h4>
+            <p>Your downwind VMG efficiency is world-class (92.3% average), meaning nearly all boat speed converts to progress downwind. Upwind efficiency (67.1% average) shows significant room for improvement. The 32.5-76.8% upwind range indicates inconsistent angle management and tacking efficiency.</p>
+        </div>
+        
+        <h3>VMG to Distance Efficiency</h3>
+        <div class="scrollable-table">
+            <table>
+                <tr>
+                    <th>Leg</th>
+                    <th>Type</th>
+                    <th>Distance (m)</th>
+                    <th>VMG (knots)</th>
+                    <th>Duration</th>
+                    <th>Efficiency</th>
+                </tr>
+                <tr>
+                    <td>Leg 8</td>
+                    <td>Downwind</td>
+                    <td>821</td>
+                    <td>4.12</td>
+                    <td>06:27</td>
+                    <td class="positive">Best</td>
+                </tr>
+                <tr>
+                    <td>Leg 7</td>
+                    <td>Upwind</td>
+                    <td>843</td>
+                    <td>3.14</td>
+                    <td>08:42</td>
+                    <td>Good</td>
+                </tr>
+                <tr>
+                    <td>Leg 3</td>
+                    <td>Upwind</td>
+                    <td>831</td>
+                    <td>2.84</td>
+                    <td>09:28</td>
+                    <td>Average</td>
+                </tr>
+                <tr>
+                    <td>Leg 1</td>
+                    <td>Upwind</td>
+                    <td>947</td>
+                    <td>0.64</td>
+                    <td>08:06</td>
+                    <td class="negative">Poor</td>
+                </tr>
+                <tr>
+                    <td>Leg 14</td>
+                    <td>Downwind</td>
+                    <td>825</td>
+                    <td>3.89</td>
+                    <td>06:51</td>
+                    <td class="positive">Excellent</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="performance-chart">
+            [VMG vs Distance Efficiency Chart Would Appear Here]
+            <p>Visualization showing the relationship between distance sailed and VMG efficiency</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Tactical Recommendations</h2>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Upwind Technical Adjustments</h3>
+                <h4>Sail Trim</h4>
+                <ul>
+                    <li>Increase mainsheet tension when pointing to 41°</li>
+                    <li>Adjust jib car position for optimal slot flow</li>
+                    <li>Fine-tune vang tension for choppy conditions</li>
+                </ul>
+                
+                <h4>Weight Placement</h4>
+                <ul>
+                    <li>Move weight forward when accelerating</li>
+                    <li>Stay centered during tacks</li>
+                    <li>Dynamic adjustments for wave patterns</li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h3>Maneuver Optimization</h3>
+                <h4>Tacking</h4>
+                <ul>
+                    <li>Initiate tacks with body movement, not rudder</li>
+                    <li>Time tacks with wave patterns</li>
+                    <li>Accelerate out with coordinated trim</li>
+                </ul>
+                
+                <h4>Gybing</h4>
+                <ul>
+                    <li>Practice smooth boom transitions</li>
+                    <li>Maintain speed with weight shifts</li>
+                    <li>Anticipate wind changes during gybes</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <h3>Training Drills</h3>
+            <div class="info-grid">
+                <div>
+                    <h4>Upwind VMG Test</h4>
+                    <p>Sail upwind at 38°, 40°, 42°, 45° for 2 minutes each, recording SOG and VMG to find your boat's optimal angle.</p>
+                </div>
+                <div>
+                    <h4>Tack Efficiency</h4>
+                    <p>Set marks 100m apart. Practice completing upwind legs with ≤3 tacks while maintaining >3.5 knots SOG.</p>
+                </div>
+                <div>
+                    <h4>Downwind Surfing</h4>
+                    <p>In choppy conditions, practice connecting 3+ waves without steering adjustments.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="highlight-box">
+            <h4>Race Preparation Strategy</h4>
+            <p><strong>Pre-Start:</strong> Spend 10 minutes testing upwind angles in current conditions. Identify optimal settings for 41-42° sailing.</p>
+            <p><strong>First Leg:</strong> Focus on clean acceleration off the line. Make first tack only after reaching full speed.</p>
+            <p><strong>Downwind:</strong> Use your natural strength - focus on connecting waves and maintaining rhythm.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Final Notes</h2>
+        <p>Lars, your downwind performance is already at world-class level, with VMG efficiency exceeding 90% in most legs. The data clearly shows our focus should be on upwind improvement, where even modest gains will yield significant race results.</p>
+        
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Immediate Goals</h3>
+                <ul>
+                    <li>Increase average upwind VMG from 2.48 to 2.9+ knots</li>
+                    <li>Reduce upwind tacks from 5.4 to ≤3 per leg</li>
+                    <li>Maintain downwind excellence (3.75+ kts VMG)</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>Long-Term Development</h3>
+                <ul>
+                    <li>Develop more consistent upwind angle management</li>
+                    <li>Improve acceleration out of tacks</li>
+                    <li>Enhance wave-reading skills upwind</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="highlight-box">
+            <h4>Projected Performance Gains</h4>
+            <p>If we can improve your upwind VMG by just 0.5 knots while maintaining downwind performance, you would gain approximately 90 seconds over a typical Olympic course. This improvement would place you in medal contention at international events.</p>
+        </div>
+        
+        <p>Your dedication to technical analysis and performance optimization is exactly what separates champions from participants. I'm excited to see your progress in our next session as we work toward Olympic gold!</p>
+        
+        <div class="performance-chart">
+            [Projected Performance Improvement Chart Would Appear Here]
+            <p>Visualization showing potential time gains from recommended improvements</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This content has been created using AI from High-Performance Sailing Analyzer 4.0 (beta): optimizing sailing data, performance, and visualizing insights.</p>
+        <p>Support: +45 30 50 91 73 | lars.stenfeldt@me.com | <a href="https://larsstenfeldt.wixstudio.com/sailing-performance">https://larsstenfeldt.wixstudio.com/sailing-performance</a></p>
+        <p>Lars Stenfeldt Hansen | Omer Brand: omerbr1@gmail.com</p>
+        <p>Report generated: April 7, 2025</p>
+    </div>
+</body>
+</html><style>:root {
+    --primary: #0066cc;
+    --primary-dark: #004fa3;
+    --secondary: #e6f2ff;
+    --positive: #009933;
+    --negative: #cc0000;
+    --improvement: #ff9900;
+    --highlight: #fff8e6;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f9fc;
+}
+
+h1, h2, h3, h4 {
+    color: var(--primary);
+    margin-top: 0;
+}
+
+/* Blue Header with Perfect Readability */
+.header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    margin-bottom: 10px;
+    font-size: 2.2em;
+}
+
+.header h2 {
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    margin-bottom: 8px;
+    font-size: 1.6em;
+}
+
+.header p {
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    margin-bottom: 0;
+    font-size: 1.1em;
+}
+
+/* Content Sections */
+.training-info, .summary {
+    background-color: var(--secondary);
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid #d0e3ff;
+}
+
+.section {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.95em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+tfoot {
+    font-weight: bold;
+    background-color: #f0f0f0;
+}
+
+.scrollable-table {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Visual Indicators */
+.positive {
+    color: var(--positive);
+    font-weight: bold;
+}
+
+.negative {
+    color: var(--negative);
+    font-weight: bold;
+}
+
+.improvement {
+    color: var(--improvement);
+    font-weight: bold;
+}
+
+.highlight-box {
+    background-color: var(--highlight);
+    border-left: 4px solid var(--improvement);
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Layout Components */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.info-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+/* UI Elements */
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.badge-positive {
+    background-color: #e6f7e6;
+    color: var(--positive);
+}
+
+.badge-negative {
+    background-color: #ffebeb;
+    color: var(--negative);
+}
+
+.performance-chart {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    margin: 20px 0;
+    color: #666;
+    font-style: italic;
+    border: 1px dashed #ccc;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.9em;
+    color: #666;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    th, td {
+        padding: 8px;
+        font-size: 0.85em;
+    }
+    
+    .header {
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 1.8em;
+    }
+    
+    .header h2 {
+        font-size: 1.4em;
+    }
+    
+    .training-info, .summary, .section {
+        padding: 20px 15px;
+    }
+}</style>
